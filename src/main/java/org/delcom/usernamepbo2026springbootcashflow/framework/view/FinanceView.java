@@ -1,5 +1,6 @@
 package org.delcom.usernamepbo2026springbootcashflow.framework.view;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -12,6 +13,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -63,6 +65,30 @@ public class FinanceView extends VerticalLayout {
 
         add(new H1("Cashflow"), buildSummaryCards(), buildToolbar(), statusLabel, grid);
         refreshAll();
+        fixConnectionIndicatorLandmark();
+    }
+
+    /**
+     * Indikator koneksi dibuat otomatis oleh Vaadin di luar view ini, sehingga Axe
+     * (aturan "region") menandainya. Jadikan ia landmark ber-label agar lolos.
+     */
+    private void fixConnectionIndicatorLandmark() {
+        UI.getCurrent().getPage().executeJs("""
+                document.documentElement.lang = 'id';
+                const fix = () => {
+                  const el = document.querySelector('vaadin-connection-indicator');
+                  if (el) {
+                    el.setAttribute('role', 'region');
+                    el.setAttribute('aria-label', 'Status koneksi');
+                    return true;
+                  }
+                  return false;
+                };
+                if (!fix()) {
+                  const t = setInterval(() => { if (fix()) clearInterval(t); }, 500);
+                  setTimeout(() => clearInterval(t), 10000);
+                }
+                """);
     }
 
     // ---------- ringkasan ----------
@@ -73,6 +99,7 @@ public class FinanceView extends VerticalLayout {
                 card("Total Pengeluaran", expenseTotal, "#FEE2E2", "#DC2626", "#991B1B"),
                 card("Saldo", balanceTotal, "#FEF3C7", "#D97706", "#92400E"));
         summary.setWidthFull();
+        summary.setFlexWrap(FlexLayout.FlexWrap.WRAP);
         summary.getStyle().set("align-items", "stretch");
         return summary;
     }
@@ -82,9 +109,10 @@ public class FinanceView extends VerticalLayout {
         caption.getStyle().set("display", "block").set("font-size", "0.875rem")
                 .set("font-weight", "500").set("color", valueColor);
         value.getStyle().set("display", "block").set("margin-top", "0.35rem")
-                .set("font-size", "1.6rem").set("font-weight", "700").set("color", valueColor);
+                .set("font-size", "1.6rem").set("font-weight", "700").set("color", valueColor)
+                .set("white-space", "nowrap");
         Div card = new Div(caption, value);
-        card.getStyle().set("flex", "1").set("min-width", "0").set("background", bg)
+        card.getStyle().set("flex", "1 1 180px").set("min-width", "0").set("background", bg)
                 .set("border", "1px solid " + accent).set("border-left", "6px solid " + accent)
                 .set("border-radius", "12px").set("padding", "1rem 1.1rem")
                 .set("box-sizing", "border-box");
@@ -170,6 +198,8 @@ public class FinanceView extends VerticalLayout {
 
         HorizontalLayout toolbar = new HorizontalLayout(searchField, search, sortSelect, refresh, income, expense);
         toolbar.setWidthFull();
+        toolbar.setFlexWrap(FlexLayout.FlexWrap.WRAP);
+        searchField.setMinWidth("200px");
         toolbar.setFlexGrow(1, searchField);
         toolbar.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.END);
         return toolbar;

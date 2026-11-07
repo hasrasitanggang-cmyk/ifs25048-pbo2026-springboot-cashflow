@@ -55,6 +55,8 @@ public class FinanceView extends VerticalLayout {
         setSizeFull();
         setPadding(true);
         setSpacing(true);
+        // Landmark utama halaman (perbaikan aksesibilitas Axe: region / landmark-one-main)
+        getElement().setAttribute("role", "main");
 
         configureGrid();
         configureToolbar();
@@ -78,7 +80,7 @@ public class FinanceView extends VerticalLayout {
     private Div card(String label, Span value, String bg, String accent, String valueColor) {
         Span caption = new Span(label);
         caption.getStyle().set("display", "block").set("font-size", "0.875rem")
-                .set("font-weight", "500").set("color", accent);
+                .set("font-weight", "500").set("color", valueColor);
         value.getStyle().set("display", "block").set("margin-top", "0.35rem")
                 .set("font-size", "1.6rem").set("font-weight", "700").set("color", valueColor);
         Div card = new Div(caption, value);
@@ -152,6 +154,12 @@ public class FinanceView extends VerticalLayout {
         Button income = new Button("Tambah Pemasukan", VaadinIcon.PLUS.create(),
                 e -> openAddDialog(TransactionType.INCOME));
         income.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+        // Hijau lebih gelap agar kontras teks putih memenuhi WCAG AA (>= 4.5:1)
+        income.getStyle()
+                .set("--lumo-success-color", "#15803d")
+                .set("--lumo-primary-color", "#15803d")
+                .set("background-color", "#15803d")
+                .set("color", "#ffffff");
 
         Button expense = new Button("Tambah Pengeluaran", VaadinIcon.MINUS.create(),
                 e -> openAddDialog(TransactionType.EXPENSE));
